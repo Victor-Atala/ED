@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import numpy as np
 
-def plot_resultados(t, T_num, T_ana, Ta, T0):
+def plot_resultados(t, T_num, T_ana, Ta, T0, k):
     """
     Genera el set de 4 gráficas de análisis térmico.
     """
@@ -32,7 +32,7 @@ def plot_resultados(t, T_num, T_ana, Ta, T0):
 
     # --- Velocidad de Enfriamiento ---
     ax4 = axes[1, 1]
-    velocidad = -0.05 * (T_num - Ta) # Ejemplo simplificado para visualización
+    velocidad = -k * (T_num - Ta) # Usando la constante k del sistema
     ax4.plot(t, velocidad, 'm-')
     ax4.set_title('Velocidad dT/dt')
     ax4.grid(True, alpha=0.3)

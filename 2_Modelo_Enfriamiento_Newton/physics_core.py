@@ -6,6 +6,7 @@ def modelo_enfriamiento(T, t, k, Ta):
     Ecuación diferencial de Enfriamiento de Newton.
     dT/dt = -k * (T - Ta)
     """
+    k = abs(k) # Validación del dominio físico: k siempre es positivo
     dTdt = -k * (T[0] - Ta)
     return [dTdt]
 
@@ -14,6 +15,7 @@ def solucion_analitica(t, T0, Ta, k):
     Solución analítica exacta de la EDO.
     T(t) = Ta + (T0 - Ta) * exp(-k * t)
     """
+    k = abs(k) # Validación del dominio físico
     return Ta + (T0 - Ta) * np.exp(-k * t)
 
 def resolver_simulacion(T0, Ta, k, t_total, num_puntos=1000):

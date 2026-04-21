@@ -40,6 +40,20 @@ num_puntos = 120
 
 # --- Título Principal ---
 st.title("🌡️ Ley de Enfriamiento de Newton")
+st.markdown("Explora de forma interactiva la disipación térmica de un sistema hacia su entorno.")
+st.markdown("---")
+
+# --- Métricas Principales ---
+col_m1, col_m2, col_m3, col_m4 = st.columns(4)
+with col_m1:
+    st.metric(label="Temp. Inicial ($T_0$)", value=f"{T0} °C", delta=f"Δ {T0 - Ta:.1f} °C vs Ambiente", delta_color="inverse")
+with col_m2:
+    st.metric(label="Temp. Ambiente ($T_a$)", value=f"{Ta} °C")
+with col_m3:
+    st.metric(label="Constante k", value=f"{k}")
+with col_m4:
+    st.metric(label="Tiempo Estabilización", value=f"{t_max:.1f} s")
+
 st.markdown("---")
 
 # --- Dashboard Principal ---
@@ -54,29 +68,50 @@ with col1:
     **Análisis Teórico:**
     Con una constante $k={k}$, el sistema alcanzará el equilibrio térmico en aproximadamente **{t_max:.1f} segundos**.
     """)
+    
+    with st.expander("📚 Fundamento Teórico", expanded=False):
+        st.markdown(r"""
+        La **Ley de Enfriamiento de Newton** postula que la tasa de cambio de temperatura de un cuerpo es proporcional a la diferencia de temperatura entre el cuerpo y su entorno:
+        
+        $$ \frac{dT}{dt} = -k(T - T_a) $$
+        
+        Integrando esta ecuación diferencial obtenemos su solución analítica:
+        
+        $$ T(t) = T_a + (T_0 - T_a) e^{-kt} $$
+        """)
 
 with col2:
     st.subheader("Evolución de la Temperatura")
     
     # Simulación en "Vivo"
     if st.button("🚀 Iniciar Simulación en Tiempo Real"):
+        progress_bar = st.progress(0, text="Inicializando motor de cálculo...")
         plot_placeholder = st.empty()
         
         # Generar datos
         t_full, T_num, T_ana = resolver_simulacion(T0, Ta, k, t_max, num_puntos)
         
-        for i in range(1, len(t_full) + 1):
-            # Mostrar progreso parcial
-            sub_t = t_full[:i]
-            sub_T = T_ana[:i]
-            
-            df = pd.DataFrame({
-                "Tiempo [s]": sub_t,
-                "Temperatura [°C]": sub_T
+        # Instanciar gráfica una sola vez con el primer punto de datos
+        df_init = pd.DataFrame({
+            "Tiempo [s]": [t_full[0]],
+            "Temperatura [°C]": [T_ana[0]]
+        }).set_index("Tiempo [s]")
+        chart = plot_placeholder.line_chart(df_init, color="#ff4b4b")
+        
+        for i in range(1, len(t_full)):
+            # Inyectar únicamente el nuevo punto en cada iteración
+            df_new = pd.DataFrame({
+                "Tiempo [s]": [t_full[i]],
+                "Temperatura [°C]": [T_ana[i]]
             }).set_index("Tiempo [s]")
             
-            plot_placeholder.line_chart(df, color="#ff4b4b")
+            chart.add_rows(df_new)
+            # Actualizar barra de progreso
+            progreso = int((i / (len(t_full) - 1)) * 100)
+            progress_bar.progress(progreso, text=f"Renderizando T={T_ana[i]:.1f} °C al t={t_full[i]:.1f}s")
             time.sleep(0.01) # Simular proceso
+            
+        progress_bar.progress(100, text="✨ Simulación completada con éxito.")
     else:
         # Gráfica estática inicial
         t_full, T_num, T_ana = resolver_simulacion(T0, Ta, k, t_max, num_puntos)
@@ -92,7 +127,7 @@ st.subheader("📈 Análisis de Resultados Científicos")
 tab1, tab2 = st.tabs(["📊 Comparativa de Soluciones", "📋 Tabla de Datos"])
 
 with tab1:
-    fig_res = plot_resultados(t_full, T_num, T_ana, Ta, T0)
+    fig_res = plot_resultados(t_full, T_num, T_ana, Ta, T0, k)
     st.pyplot(fig_res)
 
 with tab2:
