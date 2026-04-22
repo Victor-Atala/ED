@@ -2,6 +2,7 @@ import streamlit as st
 import time
 import numpy as np
 import pandas as pd
+import os
 from physics_core import resolver_simulacion, solucion_analitica
 from graphics_lib import plot_resultados, generar_diagrama_esquematico
 
@@ -18,11 +19,17 @@ st.markdown("""
     .main {
         background-color: #f8f9fa;
     }
-    .stMetric {
+    [data-testid="stMetric"] {
         background-color: #ffffff;
         padding: 15px;
         border-radius: 10px;
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    [data-testid="stMetricValue"] {
+        color: #000000 !important;
+    }
+    [data-testid="stMetricLabel"] * {
+        color: #555555 !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -64,6 +71,10 @@ with col1:
     fig_esq = generar_diagrama_esquematico(T0, Ta, k)
     st.pyplot(fig_esq)
     
+    img_esq_path = os.path.join(os.path.dirname(__file__), "diagrama_sistema_termico.png")
+    if os.path.exists(img_esq_path):
+        st.image(img_esq_path, caption="Diagrama Estático del Sistema", use_container_width=True)
+    
     st.info(f"""
     **Análisis Teórico:**
     Con una constante $k={k}$, el sistema alcanzará el equilibrio térmico en aproximadamente **{t_max:.1f} segundos**.
@@ -82,6 +93,10 @@ with col1:
 
 with col2:
     st.subheader("Evolución de la Temperatura")
+    
+    gif_path = os.path.join(os.path.dirname(__file__), "animacion_enfriamiento.gif")
+    if os.path.exists(gif_path):
+        st.image(gif_path, caption="Animación del Proceso de Enfriamiento", use_container_width=True)
     
     # Simulación en "Vivo"
     if st.button("🚀 Iniciar Simulación en Tiempo Real"):
@@ -129,6 +144,10 @@ tab1, tab2 = st.tabs(["📊 Comparativa de Soluciones", "📋 Tabla de Datos"])
 with tab1:
     fig_res = plot_resultados(t_full, T_num, T_ana, Ta, T0, k)
     st.pyplot(fig_res)
+    
+    res_img_path = os.path.join(os.path.dirname(__file__), "grafica_resultados_termicos.png")
+    if os.path.exists(res_img_path):
+        st.image(res_img_path, caption="Gráfica Estática de Resultados Guardada", use_container_width=True)
 
 with tab2:
     st.write("Datos generados por el integrador numérico:")

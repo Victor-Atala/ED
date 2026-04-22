@@ -18,9 +18,11 @@ def plot_resultados(t, T_num, T_ana, Ta, T0, k):
     ax1.grid(True, alpha=0.3)
 
     # --- Error ---
+    import matplotlib.ticker as ticker
     ax2 = axes[0, 1]
     error = np.abs(T_ana - T_num)
     ax2.semilogy(t, error + 1e-12, 'g-')
+    ax2.yaxis.set_major_formatter(ticker.FuncFormatter(lambda y, _: f"{y:.1e}"))
     ax2.set_title('Error Absoluto (Escala Log)')
     ax2.grid(True, alpha=0.3)
 
